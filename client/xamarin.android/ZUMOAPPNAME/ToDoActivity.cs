@@ -41,25 +41,32 @@ namespace ZUMOAPPNAME
             // Set our view from the "main" layout resource
             SetContentView (Resource.Layout.Activity_To_Do);
 
-            CurrentPlatform.Init ();
+            try {
+                CurrentPlatform.Init ();
 
-            // Create the Mobile Service Client instance, using the provided
-            // Mobile Service URL and key
-            client = new MobileServiceClient (applicationURL, applicationKey);
-            await InitLocalStoreAsync();
+                // Create the Mobile Service Client instance, using the provided
+                // Mobile Service URL and key
+                client = new MobileServiceClient (applicationURL, applicationKey);
+                await InitLocalStoreAsync();
 
-            // Get the Mobile Service sync table instance to use
-            toDoTable = client.GetSyncTable <ToDoItem> ();
+                // Get the Mobile Service sync table instance to use
+                toDoTable = client.GetSyncTable <ToDoItem> ();
 
-            textNewToDo = FindViewById<EditText> (Resource.Id.textNewToDo);
+                textNewToDo = FindViewById<EditText> (Resource.Id.textNewToDo);
 
-            // Create an adapter to bind the items with the view
-            adapter = new ToDoItemAdapter (this, Resource.Layout.Row_List_To_Do);
-            var listViewToDo = FindViewById<ListView> (Resource.Id.listViewToDo);
-            listViewToDo.Adapter = adapter;
+                // Create an adapter to bind the items with the view
+                adapter = new ToDoItemAdapter (this, Resource.Layout.Row_List_To_Do);
+                var listViewToDo = FindViewById<ListView> (Resource.Id.listViewToDo);
+                listViewToDo.Adapter = adapter;
 
-            // Load the items from the Mobile Service
-            OnRefreshItemsSelected ();
+                // Load the items from the Mobile Service
+                OnRefreshItemsSelected ();
+
+            } catch (Java.Net.MalformedURLException) {
+                CreateAndShowDialog (new Exception ("There was an error creating the Mobile Service. Verify the URL"), "Error");
+            } catch (Exception e) {
+                CreateAndShowDialog (e, "Error");
+            }
         }
 
         private async Task InitLocalStoreAsync()
@@ -102,14 +109,8 @@ namespace ZUMOAPPNAME
 
         private async Task SyncAsync()
         {
-			try {
-	            await client.SyncContext.PushAsync();
-	            await toDoTable.PullAsync("allTodoItems", toDoTable.CreateQuery()); // query ID is used for incremental sync
-			} catch (Java.Net.MalformedURLException) {
-				CreateAndShowDialog (new Exception ("There was an error creating the Mobile Service. Verify the URL"), "Error");
-			} catch (Exception e) {
-				CreateAndShowDialog (e, "Error");
-			}
+            await client.SyncContext.PushAsync();
+            await toDoTable.PullAsync("allTodoItems", toDoTable.CreateQuery()); // query ID is used for incremental sync
         }
 
         // Called when the refresh menu option is selected
