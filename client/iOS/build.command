@@ -1,3 +1,4 @@
+# FIx docjsld ha;llh;shffa ds
 # This bash script cleans and builds the Microsoft Azure Mobile Services QuickStart project
 
 # First, we'll remove all previous artifacts created by this script
